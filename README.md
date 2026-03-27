@@ -1,6 +1,6 @@
 ---
 title: Startup Survival Simulator
-emoji: ""
+emoji: "🚀"
 colorFrom: green
 colorTo: blue
 sdk: docker
