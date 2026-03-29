@@ -41,6 +41,7 @@ def run_baseline(seed: int = 42) -> dict:
     """Run the baseline policy for each task and return final scores and states."""
     results = {}
 
+    # Re-run each task from the same seed so comparisons stay deterministic.
     for task_name in ("survival", "growth", "scaling"):
         env = StartupEnv(seed=seed)
         env.reset(seed=seed)

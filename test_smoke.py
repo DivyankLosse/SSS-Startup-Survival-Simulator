@@ -44,6 +44,7 @@ def test_grader_and_baseline_are_valid() -> None:
     assert response.status_code == 200
     assert 0.0 <= response.json()["score"] <= 1.0
 
+    # The baseline endpoint should always report one entry per published task.
     baseline_response = client.get("/baseline", params={"seed": 42})
     assert baseline_response.status_code == 200
     baseline_payload = baseline_response.json()

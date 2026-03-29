@@ -44,6 +44,7 @@ class StartupEnv:
         prev_users = state.users
         prev_revenue = state.revenue
 
+        # Growth is applied before revenue so monetization reflects the updated user base.
         acquired_users = self._calculate_new_users(state)
         lost_users = min(state.users, int(state.users * state.churn_rate))
         state.users = max(0, state.users + acquired_users - lost_users)

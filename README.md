@@ -15,6 +15,8 @@ license: mit
 
 Startup Survival Simulator is a real-world, OpenEnv-style environment where an AI agent runs an early-stage startup. The agent must balance growth, burn, product quality, morale, and market conditions through a simple `reset()` / `step()` / `state()` interface exposed via FastAPI.
 
+The codebase is intentionally small so judges can inspect the rules quickly and run the environment without extra setup.
+
 ## Problem Statement
 
 Most startups fail because of compounding operational mistakes rather than one single bad decision. This environment turns startup execution into a measurable decision-making loop that an agent can learn from.
@@ -95,7 +97,7 @@ Each task is graded from `0.0` to `1.0`.
 ## How to Run Locally
 
 ```bash
-pip install fastapi uvicorn pydantic httpx pytest
+pip install -r requirements.txt
 uvicorn api:app --host 0.0.0.0 --port 7860
 ```
 

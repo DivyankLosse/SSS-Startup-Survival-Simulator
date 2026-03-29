@@ -4,6 +4,7 @@ from models import GraderResponse, StartupState
 
 
 def _clamp(value: float) -> float:
+    """Clamp grader outputs into the public 0..1 score range."""
     return max(0.0, min(1.0, float(value)))
 
 

@@ -62,4 +62,5 @@ class GraderResponse(BaseModel):
     @field_validator("score")
     @classmethod
     def clamp_score(cls, value: float) -> float:
+        """Defend against floating-point drift in downstream score calculations."""
         return max(0.0, min(1.0, float(value)))

@@ -15,6 +15,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Keep a single in-process environment instance for the simple demo API.
 env = StartupEnv(seed=42)
 
 

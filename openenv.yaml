@@ -2,6 +2,7 @@ name: startup-survival-env
 version: "1.0.0"
 description: Real-world startup operations environment with OpenEnv-style step/reset/state APIs.
 
+# Public action names accepted by POST /step.
 actions:
   - increase_marketing
   - hire_engineer
@@ -36,6 +37,7 @@ tasks:
 
 api:
   endpoints:
+    # Root stays simple so a health check can confirm the app is up.
     root: /
     reset: /reset
     step: /step
