@@ -9,92 +9,123 @@ pinned: false
 license: mit
 ---
 
-# Startup Survival Simulator
+# 🚀 Startup Survival Simulator
 
-## Project Overview
+> An OpenEnv-style AI decision environment where an LLM agent runs an early-stage startup through growth, burn, churn, and market pressure.
 
-Startup Survival Simulator is a real-world, OpenEnv-style environment where an AI agent runs an early-stage startup. The agent must balance growth, burn, product quality, morale, and market conditions through a simple `reset()` / `step()` / `state()` interface exposed via FastAPI.
+**Live Space:** https://dootisaha25-startup-survival-simulator.hf.space  
+**API Docs:** https://dootisaha25-startup-survival-simulator.hf.space/docs
 
-The codebase is intentionally small so judges can inspect the rules quickly and run the environment without extra setup.
+---
 
-## Problem Statement
+## Overview
 
-Most startups fail because of compounding operational mistakes rather than one single bad decision. This environment turns startup execution into a measurable decision-making loop that an agent can learn from.
+Startup Survival Simulator is a real-world, OpenEnv-compliant environment exposing a standard `reset()` / `step()` / `state()` interface via FastAPI. An AI agent observes 10 startup metrics and chooses one of 7 actions each turn. The environment evolves through compounding effects on growth, revenue, product quality, morale, and cash — reflecting the real decisions an early-stage founder faces.
 
-## Why This Matters
+Episodes end when the startup **goes bankrupt**, **reaches 10,000 users**, or hits the **50-step timeout**.
 
-- It models a real-world system instead of a toy game.
-- It creates clear trade-offs between growth and sustainability.
-- It is easy for judges to test, understand, and benchmark.
+---
 
-## Environment Design
+## Environment Variables
 
-Each episode starts with a fragile early-stage startup. Every action changes the company trajectory: marketing can accelerate user growth, cost cutting preserves runway, product work reduces churn, and fundraising can buy time for scaling.
+Set these before running `inference.py`:
 
-Episodes end when one of the following happens:
+| Variable | Description | Example |
+|---|---|---|
+| `API_BASE_URL` | OpenAI-compatible LLM endpoint | `https://api-inference.huggingface.co/v1` |
+| `MODEL_NAME` | Model identifier | `mistralai/Mistral-7B-Instruct-v0.3` |
+| `HF_TOKEN` | Hugging Face API key | `hf_xxxxxxxxxxxx` |
 
-- The startup goes bankrupt.
-- The startup reaches 10,000 users.
-- The simulation reaches 50 time steps.
+```bash
+export API_BASE_URL="https://api-inference.huggingface.co/v1"
+export MODEL_NAME="mistralai/Mistral-7B-Instruct-v0.3"
+export HF_TOKEN="hf_xxxxxxxxxxxx"
+```
 
-## State / Observation Space
+---
 
-- `cash`: available cash in USD
-- `users`: active users
-- `revenue`: current revenue in USD
-- `growth_rate`: user growth multiplier
-- `burn_rate`: operating burn per step
-- `churn_rate`: fraction of users lost each step
-- `product_quality`: product quality score from `0.0` to `1.0`
-- `market_demand`: demand score from `0.0` to `1.0`
-- `morale`: team morale score from `0.0` to `1.0`
-- `time_step`: current step counter
+## Observation Space
+
+| Field | Type | Description |
+|---|---|---|
+| `cash` | `float` | Available cash in USD |
+| `users` | `int` | Active users |
+| `revenue` | `float` | Revenue this step in USD |
+| `growth_rate` | `float [0,1]` | New-user multiplier |
+| `burn_rate` | `float` | Operating cost per step in USD |
+| `churn_rate` | `float [0,1]` | Fraction of users lost per step |
+| `product_quality` | `float [0,1]` | Product quality score |
+| `market_demand` | `float [0,1]` | External market demand score |
+| `morale` | `float [0,1]` | Team morale score |
+| `time_step` | `int` | Current step counter |
+
+**Starting values:** cash=50,000 · users=100 · revenue=1,000 · growth_rate=0.08 · burn_rate=4,500 · churn_rate=0.03 · product_quality=0.55 · market_demand=0.60 · morale=0.70
+
+---
 
 ## Action Space
 
-- `increase_marketing`
-- `hire_engineer`
-- `improve_product`
-- `reduce_costs`
-- `pivot_market`
-- `raise_funding`
-- `do_nothing`
+| Action | Effect |
+|---|---|
+| `increase_marketing` | +growth_rate, +market_demand, ++burn_rate |
+| `hire_engineer` | ++product_quality, +morale, +++burn_rate |
+| `improve_product` | +product_quality, −churn_rate, +morale |
+| `reduce_costs` | −burn_rate, −growth_rate, −morale |
+| `pivot_market` | Random market_demand ± shift (high risk/reward) |
+| `raise_funding` | Probabilistic +$30,000 cash (based on product quality & users) |
+| `do_nothing` | −morale (tiny) |
 
-## Reward Logic
+---
 
-The reward function gives partial progress signals each step. It rewards:
+## Tasks & Grading
 
-- net user growth
-- revenue growth
-- product quality gains
+| Task | Difficulty | Goal | Scoring Formula |
+|---|---|---|---|
+| `survival` | Easy | Survive 30 steps without bankruptcy | `time_step / 30 − cash_penalty` |
+| `growth` | Medium | Reach 1,000 active users | `users / 1000 + sustainability_bonus` |
+| `scaling` | Hard | Maximize revenue/burn efficiency | `efficiency × 0.7 + user_factor × 0.3` |
 
-It penalizes:
+All scores are clamped to `[0.0, 1.0]`.
 
-- high burn
-- high churn
-- unsustainable decisions
-
-This keeps the environment useful both for simple baselines and more advanced agents.
-
-## Tasks
-
-- `survival` (easy): survive at least 30 steps without going bankrupt
-- `growth` (medium): reach at least 1000 users while staying viable
-- `scaling` (hard): maximize revenue and users relative to burn
-
-Each task is graded from `0.0` to `1.0`.
+---
 
 ## API Endpoints
 
-- `GET /` returns service status
-- `POST /reset` resets the environment and optionally accepts a seed
-- `POST /step` applies one action
-- `GET /state` returns the current state
-- `GET /tasks` returns task metadata plus action schema
-- `GET /grader?task_name=...` returns a grader score for the current state
-- `GET /baseline` runs the deterministic baseline across all tasks
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/` | HTML landing page — returns HTTP 200 |
+| `POST` | `/reset` | Reset environment, optional `{"seed": 42}` body |
+| `POST` | `/step` | Apply action, e.g. `{"action": "improve_product"}` |
+| `GET` | `/state` | Current environment state |
+| `GET` | `/tasks` | Task list + action schema |
+| `GET` | `/grader?task_name=survival` | Score current state for a task |
+| `GET` | `/baseline?seed=42` | Run deterministic baseline across all tasks |
+| `GET` | `/docs` | Interactive Swagger UI |
 
-## How to Run Locally
+---
+
+## Running the Inference Script
+
+```bash
+pip install -r requirements.txt
+python inference.py
+```
+
+Expected output format:
+```
+[START] Task: survival
+[STEP] Step: 1, State: {...}, Action: improve_product
+[STEP] Step: 2, State: {...}, Action: raise_funding
+...
+[END] Task: survival, Score: 0.93
+[START] Task: growth
+...
+[END] Task: scaling, Score: 0.71
+```
+
+---
+
+## Running the API Locally
 
 ```bash
 pip install -r requirements.txt
@@ -103,44 +134,67 @@ uvicorn api:app --host 0.0.0.0 --port 7860
 
 Then open [http://localhost:7860/docs](http://localhost:7860/docs).
 
-## Example Requests
+---
 
-Reset the environment:
-
-```bash
-curl -X POST "http://localhost:7860/reset" -H "Content-Type: application/json" -d "{}"
-```
-
-Take one step:
+## Example curl Requests
 
 ```bash
-curl -X POST "http://localhost:7860/step" -H "Content-Type: application/json" -d "{\"action\":\"increase_marketing\"}"
-```
+# Reset with seed
+curl -X POST "http://localhost:7860/reset" \
+     -H "Content-Type: application/json" -d '{"seed": 42}'
 
-Get the current state:
+# Take a step
+curl -X POST "http://localhost:7860/step" \
+     -H "Content-Type: application/json" -d '{"action": "improve_product"}'
 
-```bash
+# Get current state
 curl "http://localhost:7860/state"
-```
 
-Run the baseline:
+# Score for survival task
+curl "http://localhost:7860/grader?task_name=survival"
 
-```bash
+# Run baseline across all tasks
 curl "http://localhost:7860/baseline"
 ```
 
-## Deployment Notes
+---
 
-This project is designed to run cleanly in a Hugging Face Docker Space:
-
-- the API serves on port `7860`
-- the root endpoint returns HTTP `200`
-- `/reset` works without any environment variables
-- the Docker image only installs lightweight dependencies
-
-Build locally with Docker:
+## Docker
 
 ```bash
 docker build -t startup-survival-simulator .
-docker run -p 7860:7860 startup-survival-simulator
+docker run -p 7860:7860 \
+  -e API_BASE_URL="https://api-inference.huggingface.co/v1" \
+  -e MODEL_NAME="mistralai/Mistral-7B-Instruct-v0.3" \
+  -e HF_TOKEN="hf_xxxx" \
+  startup-survival-simulator
+```
+
+---
+
+## Smoke Tests
+
+```bash
+pip install pytest httpx
+pytest test_smoke.py -v
+```
+
+All 4 tests should pass in under 1 second.
+
+---
+
+## Project Structure
+
+```
+├── api.py            # FastAPI app — all HTTP endpoints
+├── env.py            # StartupEnv simulation logic
+├── models.py         # Pydantic typed models (State, Action, StepResult, etc.)
+├── grader.py         # Task graders — survival / growth / scaling
+├── tasks.py          # Task metadata for /tasks endpoint
+├── baseline.py       # Deterministic baseline policy
+├── inference.py      # LLM inference script (hackathon evaluator entry point)
+├── test_smoke.py     # Pre-submission smoke tests
+├── openenv.yaml      # OpenEnv spec manifest
+├── Dockerfile        # Docker build for HF Spaces
+└── requirements.txt  # Python dependencies
 ```
