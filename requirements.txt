@@ -7,3 +7,5 @@ pydantic
 httpx
 pytest
 pyyaml
+
+openai
