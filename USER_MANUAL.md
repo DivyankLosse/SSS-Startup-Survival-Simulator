@@ -1,6 +1,6 @@
 # Startup Survival Simulator — User Manual
 
-> **Version 1.0.0** · Last updated: April 2026  
+> **Version 1.1.0** · Last updated: April 2026  
 > Live API: https://dootisaha25-startup-survival-simulator.hf.space
 
 ---
@@ -128,21 +128,35 @@ python inference.py
 
 ### Output format (mandatory)
 
+The evaluator parses stdout **token-by-token** — every field name, `=` separator, spacing, and lowercase boolean must be exact.
+
 ```
-[START] Task: survival
-[STEP] Step: 1, State: {'cash': 50000.0, 'users': 100, ...}, Action: improve_product
-[STEP] Step: 2, State: {'cash': 46800.0, 'users': 138, ...}, Action: raise_funding
+[START] task=survival env=startup-survival-simulator model=Qwen/Qwen2.5-72B-Instruct
+[STEP] step=1 action=improve_product reward=12.50 done=false error=null
+[STEP] step=2 action=raise_funding reward=8.30 done=false error=null
 ...
-[END] Task: survival, Score: 0.9333333333333333
-[START] Task: growth
+[END] success=true steps=30 score=0.933 rewards=12.50,8.30,...
+[START] task=growth env=startup-survival-simulator model=Qwen/Qwen2.5-72B-Instruct
 ...
-[END] Task: growth, Score: 0.45
-[START] Task: scaling
+[END] success=false steps=50 score=0.450 rewards=...
+[START] task=scaling env=startup-survival-simulator model=Qwen/Qwen2.5-72B-Instruct
 ...
-[END] Task: scaling, Score: 1.0
+[END] success=true steps=22 score=1.000 rewards=...
 ```
 
-> ⚠️ **Field names, brackets, and colons must be exact** — the evaluator parses these with regex.
+| Field | Format | Notes |
+|---|---|---|
+| `task` | string | Task name: `survival`, `growth`, `scaling` |
+| `env` | string | Always `startup-survival-simulator` |
+| `model` | string | Value of `MODEL_NAME` env var |
+| `step` | integer | 1-indexed |
+| `action` | string | Exact action name, e.g. `improve_product` |
+| `reward` | `0.00` | 2 decimal places |
+| `done` | `true`/`false` | **Lowercase** boolean |
+| `error` | string or `null` | Raw error message or `null` |
+| `success` | `true`/`false` | **Lowercase** — `true` if score ≥ 0.5 |
+| `score` | `0.000` | 3 decimal places |
+| `rewards` | `r1,r2,...` | Comma-separated, 2 decimal places each |
 
 ### Typical runtime
 
