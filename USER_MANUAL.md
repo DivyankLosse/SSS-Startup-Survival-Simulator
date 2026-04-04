@@ -84,15 +84,15 @@ All three variables are **required** to run `Inference.py`. The API server itsel
 
 **Windows (PowerShell):**
 ```powershell
-$env:API_BASE_URL = "https://api-inference.huggingface.co/v1"
-$env:MODEL_NAME   = "mistralai/Mistral-7B-Instruct-v0.3"
+$env:API_BASE_URL = "https://router.huggingface.co/v1"
+$env:MODEL_NAME   = "Qwen/Qwen2.5-7B-Instruct"
 $env:HF_TOKEN     = "hf_xxxxxxxxxxxxxxxxxxxx"
 ```
 
 **Linux / macOS:**
 ```bash
-export API_BASE_URL="https://api-inference.huggingface.co/v1"
-export MODEL_NAME="mistralai/Mistral-7B-Instruct-v0.3"
+export API_BASE_URL="https://router.huggingface.co/v1"
+export MODEL_NAME="Qwen/Qwen2.5-7B-Instruct"
 export HF_TOKEN="hf_xxxxxxxxxxxxxxxxxxxx"
 ```
 
@@ -100,11 +100,11 @@ export HF_TOKEN="hf_xxxxxxxxxxxxxxxxxxxx"
 
 | Model | Speed | Quality | Notes |
 |---|---|---|---|
-| `mistralai/Mistral-7B-Instruct-v0.3` | Fast | Good | Default recommendation |
+| `Qwen/Qwen2.5-7B-Instruct` | Fast | Good | Default recommendation |
 | `HuggingFaceH4/zephyr-7b-beta` | Fast | Good | Strong instruction following |
 | `meta-llama/Meta-Llama-3-8B-Instruct` | Medium | Great | Best reasoning, may require access |
 
-> **HF Inference API base URL is always:** `https://api-inference.huggingface.co/v1`
+> **HF Router base URL:** `https://router.huggingface.co/v1`
 
 ---
 
@@ -131,17 +131,17 @@ python Inference.py
 The evaluator parses stdout **token-by-token** — every field name, `=` separator, spacing, and lowercase boolean must be exact.
 
 ```
-[START] task=survival env=startup-survival-simulator model=Qwen/Qwen2.5-72B-Instruct
+[START] task=survival env=startup-survival-simulator model=Qwen/Qwen2.5-7B-Instruct
 [STEP] step=1 action=improve_product reward=12.50 done=false error=null
 [STEP] step=2 action=raise_funding reward=8.30 done=false error=null
 ...
-[END] success=true steps=30 score=0.933 rewards=12.50,8.30,...
-[START] task=growth env=startup-survival-simulator model=Qwen/Qwen2.5-72B-Instruct
+[END] success=true steps=30 rewards=12.50,8.30,...
+[START] task=growth env=startup-survival-simulator model=Qwen/Qwen2.5-7B-Instruct
 ...
-[END] success=false steps=50 score=0.450 rewards=...
-[START] task=scaling env=startup-survival-simulator model=Qwen/Qwen2.5-72B-Instruct
+[END] success=false steps=50 rewards=...
+[START] task=scaling env=startup-survival-simulator model=Qwen/Qwen2.5-7B-Instruct
 ...
-[END] success=true steps=22 score=1.000 rewards=...
+[END] success=true steps=22 rewards=...
 ```
 
 | Field | Format | Notes |
@@ -155,7 +155,6 @@ The evaluator parses stdout **token-by-token** — every field name, `=` separat
 | `done` | `true`/`false` | **Lowercase** boolean |
 | `error` | string or `null` | Raw error message or `null` |
 | `success` | `true`/`false` | **Lowercase** — `true` if score ≥ 0.5 |
-| `score` | `0.000` | 3 decimal places |
 | `rewards` | `r1,r2,...` | Comma-separated, 2 decimal places each |
 
 ### Typical runtime

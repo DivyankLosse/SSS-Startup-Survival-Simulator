@@ -32,13 +32,13 @@ Set these before running `Inference.py`:
 
 | Variable | Description | Example |
 |---|---|---|
-| `API_BASE_URL` | OpenAI-compatible LLM endpoint | `https://api-inference.huggingface.co/v1` |
-| `MODEL_NAME` | Model identifier | `mistralai/Mistral-7B-Instruct-v0.3` |
+| `API_BASE_URL` | OpenAI-compatible LLM endpoint | `https://router.huggingface.co/v1` |
+| `MODEL_NAME` | Model identifier | `Qwen/Qwen2.5-7B-Instruct` |
 | `HF_TOKEN` | Hugging Face API key | `hf_xxxxxxxxxxxx` |
 
 ```bash
-export API_BASE_URL="https://api-inference.huggingface.co/v1"
-export MODEL_NAME="mistralai/Mistral-7B-Instruct-v0.3"
+export API_BASE_URL="https://router.huggingface.co/v1"
+export MODEL_NAME="Qwen/Qwen2.5-7B-Instruct"
 export HF_TOKEN="hf_xxxxxxxxxxxx"
 ```
 
@@ -112,15 +112,12 @@ python Inference.py
 ```
 
 Expected output format:
-```
-[START] Task: survival
-[STEP] Step: 1, State: {...}, Action: improve_product
-[STEP] Step: 2, State: {...}, Action: raise_funding
+```text
+[START] task=survival env=startup-survival-simulator model=Qwen/Qwen2.5-7B-Instruct
+[STEP] step=1 action=improve_product reward=12.50 done=false error=null
+[STEP] step=2 action=raise_funding reward=8.30 done=false error=null
 ...
-[END] Task: survival, Score: 0.93
-[START] Task: growth
-...
-[END] Task: scaling, Score: 0.71
+[END] success=true steps=30 rewards=12.50,8.30,...
 ```
 
 ---
@@ -164,8 +161,8 @@ curl "http://localhost:7860/baseline"
 ```bash
 docker build -t startup-survival-simulator .
 docker run -p 7860:7860 \
-  -e API_BASE_URL="https://api-inference.huggingface.co/v1" \
-  -e MODEL_NAME="mistralai/Mistral-7B-Instruct-v0.3" \
+  -e API_BASE_URL="https://router.huggingface.co/v1" \
+  -e MODEL_NAME="Qwen/Qwen2.5-7B-Instruct" \
   -e HF_TOKEN="hf_xxxx" \
   startup-survival-simulator
 ```
@@ -180,6 +177,11 @@ pytest test_smoke.py -v
 ```
 
 All 4 tests should pass in under 1 second.
+
+Pre-submission validator:
+```bash
+bash validate_submission.sh
+```
 
 ---
 
