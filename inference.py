@@ -22,9 +22,10 @@ from openai import OpenAI
 from env import StartupEnv
 from grader import grade
 
-API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
-API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
-MODEL_NAME = os.getenv("MODEL_NAME") or "Qwen/Qwen2.5-7B-Instruct"
+HF_TOKEN = os.getenv("HF_TOKEN")
+API_KEY = HF_TOKEN or os.getenv("API_KEY")
+API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
+MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-7B-Instruct")
 BENCHMARK = os.getenv("BENCHMARK", "startup-survival-simulator")
 
 SUCCESS_SCORE_THRESHOLD = 0.5
@@ -53,9 +54,9 @@ def log_step(step: int, action: str, reward: float, done: bool, error: Optional[
     )
 
 
-def log_end(success: bool, steps: int, rewards: List[float]) -> None:
+def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
     rewards_str = ",".join(f"{reward:.2f}" for reward in rewards)
-    print(f"[END] success={str(success).lower()} steps={steps} rewards={rewards_str}", flush=True)
+    print(f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}", flush=True)
 
 
 def choose_preferred_action(task_name: str, state: dict) -> str:
@@ -164,8 +165,9 @@ def run_inference() -> None:
             success = score >= SUCCESS_SCORE_THRESHOLD
         except Exception:
             success = False
+            score = 0.0
         finally:
-            log_end(success=success, steps=steps_taken, rewards=rewards)
+            log_end(success=success, steps=steps_taken, score=score, rewards=rewards)
 
 
 if __name__ == "__main__":
