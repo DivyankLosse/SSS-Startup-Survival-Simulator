@@ -72,7 +72,7 @@ uvicorn api:app --host 0.0.0.0 --port 7860
 
 ## 3. Environment Variables
 
-All three variables are **required** to run `inference.py`. The API server itself runs without them (no LLM calls at server startup).
+All three variables are **required** to run `Inference.py`. The API server itself runs without them (no LLM calls at server startup).
 
 | Variable | Purpose | Where to get it |
 |---|---|---|
@@ -110,10 +110,10 @@ export HF_TOKEN="hf_xxxxxxxxxxxxxxxxxxxx"
 
 ## 4. Running the Inference Script
 
-`inference.py` is the **official evaluator entry point**. It runs 3 tasks end-to-end and prints structured logs.
+`Inference.py` is the **official evaluator entry point**. It runs 3 tasks end-to-end and prints structured logs.
 
 ```bash
-python inference.py
+python Inference.py
 ```
 
 ### What it does
@@ -374,7 +374,7 @@ score = clamp(efficiency × 0.7 + user_factor × 0.3)
 
 ## 8. Writing Your Own Agent
 
-You can replace the LLM calls in `inference.py` with any agent — rule-based, ML model, or another LLM.
+You can replace the LLM calls in `Inference.py` with any agent — rule-based, ML model, or another LLM.
 
 ### Minimal agent loop
 
@@ -496,7 +496,7 @@ test_smoke.py::test_grader_and_baseline_are_valid    PASSED
 $env:API_BASE_URL = "https://api-inference.huggingface.co/v1"
 $env:MODEL_NAME   = "mistralai/Mistral-7B-Instruct-v0.3"
 $env:HF_TOKEN     = "hf_xxxx"
-python inference.py
+python Inference.py
 ```
 
 ---
@@ -533,14 +533,14 @@ The Space rebuilds automatically. Build takes ~2 minutes.
 
 ## 11. Troubleshooting
 
-### `inference.py` exits immediately with no output
+### `Inference.py` exits immediately with no output
 
 - Check that `API_BASE_URL`, `MODEL_NAME`, and `HF_TOKEN` are set
 - Run `echo $env:HF_TOKEN` (PowerShell) or `echo $HF_TOKEN` (bash)
 
 ### LLM returns an invalid action
 
-`inference.py` has a fallback: any response not in the valid action list is automatically replaced with `do_nothing`. The run won't crash.
+`Inference.py` has a fallback: any response not in the valid action list is automatically replaced with `do_nothing`. The run won't crash.
 
 ### `POST /step` returns 400
 
