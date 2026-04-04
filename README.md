@@ -28,7 +28,7 @@ Episodes end when the startup **goes bankrupt**, **reaches 10,000 users**, or hi
 
 ## Environment Variables
 
-Set these before running `inference.py`:
+Set these before running `Inference.py`:
 
 | Variable | Description | Example |
 |---|---|---|
@@ -108,7 +108,7 @@ All scores are clamped to `[0.0, 1.0]`.
 
 ```bash
 pip install -r requirements.txt
-python inference.py
+python Inference.py
 ```
 
 Expected output format:
@@ -194,7 +194,7 @@ bash validate_submission.sh
 ├── grader.py         # Task graders — survival / growth / scaling
 ├── tasks.py          # Task metadata for /tasks endpoint
 ├── baseline.py       # Deterministic baseline policy
-├── inference.py      # LLM inference script (hackathon evaluator entry point)
+├── Inference.py      # LLM inference script (hackathon evaluator entry point)
 ├── test_smoke.py     # Pre-submission smoke tests
 ├── openenv.yaml      # OpenEnv spec manifest
 ├── Dockerfile        # Docker build for HF Spaces
