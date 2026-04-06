@@ -46,7 +46,7 @@ run_with_timeout() {
 
 log "${BOLD}Step 1/3: Checking repo contents${NC} ..."
 
-for required_file in inference.py openenv.yaml requirements.txt; do
+for required_file in interface.py inference.py openenv.yaml requirements.txt; do
   if [ ! -f "$REPO_DIR/$required_file" ]; then
     fail "Missing required file: $required_file"
     stop_at "Step 1"
