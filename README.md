@@ -106,7 +106,7 @@ All scores are clamped to `[0.0, 1.0]`.
 
 ## Submission Files
 
-The hackathon verifier expects these files in the repo root:
+The evaluation verifier expects these files in the repo root:
 
 - `interface.py`
 - `openenv.yaml`
@@ -183,7 +183,7 @@ bash validate_submission.sh
 ├── grader.py         # Task graders — survival / growth / scaling
 ├── tasks.py          # Task metadata for /tasks endpoint
 ├── baseline.py       # Deterministic baseline policy
-├── inference.py      # LLM inference script (hackathon evaluator entry point)
+├── inference.py      # LLM inference script (inference entry point)
 ├── interface.py      # Repo-root compatibility interface for submission validators
 ├── test_smoke.py     # Pre-submission smoke tests
 ├── openenv.yaml      # OpenEnv spec manifest

@@ -7,8 +7,8 @@ import random
 from dataclasses import dataclass
 from typing import Dict, List, Tuple
 
-from sss_hackathon_env import ACTIONS, StartupSurvivalEnv
-from sss_reward_verifier import verify_episode
+from advanced_env import ACTIONS, StartupSurvivalEnv
+from reward_verifier import verify_episode
 
 
 @dataclass

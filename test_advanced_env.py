@@ -1,8 +1,8 @@
-"""Smoke tests for hackathon-specific SSS environment and training flow."""
+"""Smoke tests for evaluation-specific SSS environment and training flow."""
 
-from sss_hackathon_env import ACTIONS, StartupSurvivalEnv
-from sss_reward_verifier import verify_episode
-from sss_training import (
+from advanced_env import ACTIONS, StartupSurvivalEnv
+from reward_verifier import verify_episode
+from train_policy import (
     build_greedy_policy,
     evaluate_policy,
     evaluate_policy_in_scenario,

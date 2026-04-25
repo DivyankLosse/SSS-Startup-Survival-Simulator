@@ -1,4 +1,4 @@
-"""Hackathon-focused Startup Survival Simulator environment.
+"""Evaluation-focused Startup Survival Simulator environment.
 
 OpenEnv-style API:
 - reset()
@@ -12,7 +12,7 @@ import random
 from dataclasses import dataclass, asdict
 from typing import Dict, List, Optional, Tuple
 
-from sss_reward_verifier import compute_reward
+from reward_verifier import compute_reward
 
 
 ACTIONS: List[str] = [
@@ -48,7 +48,7 @@ SCENARIOS: Dict[str, Dict[str, float]] = {
 
 @dataclass
 class StartupState:
-    """Visible simulation state (includes mandatory hackathon fields)."""
+    """Visible simulation state (includes mandatory evaluation fields)."""
 
     funding: float = 50_000.0
     team_size: int = 4

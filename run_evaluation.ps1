@@ -99,7 +99,7 @@ if user_site and os.path.isdir(user_site) and user_site not in sys.path:
     sys.path.insert(0, user_site)
 "@
 
-    $tmpFile = Join-Path $env:TEMP ("sss_demo_runner_" + [guid]::NewGuid().ToString("N") + ".py")
+    $tmpFile = Join-Path $env:TEMP ("evaluate_policy_runner_" + [guid]::NewGuid().ToString("N") + ".py")
     Set-Content -Path $tmpFile -Value ($bootstrap + "`r`n" + $Code) -Encoding UTF8
 
     try {
@@ -121,12 +121,12 @@ if user_site and os.path.isdir(user_site) and user_site not in sys.path:
 try {
     Write-Step "Preflight: checking required project files"
     $requiredFiles = @(
-        "sss_demo.py",
-        "sss_stress_debug.py",
-        "sss_visualize_demo.py",
-        "sss_hackathon_env.py",
-        "sss_training.py",
-        "sss_reward_verifier.py",
+        "evaluate_policy.py",
+        "system_stress_test.py",
+        "visualize_evaluation.py",
+        "advanced_env.py",
+        "train_policy.py",
+        "reward_verifier.py",
         "api.py",
         "requirements.txt"
     )
@@ -162,9 +162,9 @@ print(json.dumps({"dependency_check": "ok", "python": sys.executable}, indent=2)
     Invoke-PythonStep -Name "Judge Flow 1/4: generate baseline-vs-trained demo outputs" -Code @'
 import json
 from pathlib import Path
-import sss_demo
+import evaluate_policy
 
-results = sss_demo.run_demo()
+results = evaluate_policy.run_demo()
 out = {
     "improvement": results["improvement"],
     "standard_baseline_reward": results["baseline_metrics"]["avg_total_reward"],
@@ -172,18 +172,18 @@ out = {
 }
 print(json.dumps(out, indent=2))
 
-expected = Path("demo_outputs/demo_results.json")
+expected = Path("evaluation_outputs/evaluation_results.json")
 if not expected.exists():
-    raise SystemExit("demo_results.json was not generated.")
+    raise SystemExit("evaluation_results.json was not generated.")
 '@
 
-    Invoke-PythonStep -Name "Judge Flow 2/4: build visualization plots from demo_outputs" -Code @'
+    Invoke-PythonStep -Name "Judge Flow 2/4: build visualization plots from evaluation_outputs" -Code @'
 import json
 from pathlib import Path
-import sss_visualize_demo
+import visualize_evaluation
 
-sss_visualize_demo.validate_input()
-plot_path = sss_visualize_demo.build_plots()
+visualize_evaluation.validate_input()
+plot_path = visualize_evaluation.build_plots()
 print(json.dumps({"plot_path": str(plot_path)}, indent=2))
 
 if not Path(plot_path).exists():
@@ -192,9 +192,9 @@ if not Path(plot_path).exists():
 
     Invoke-PythonStep -Name "Judge Flow 3/4: run stress-debug anti-hacking checks" -Code @'
 import json
-import sss_stress_debug
+import system_stress_test
 
-report = sss_stress_debug.run_stress_debug()
+report = system_stress_test.run_stress_debug()
 print(json.dumps({
     "all_assertions_passed": report["all_assertions_passed"],
     "assertions": report["assertions"],
@@ -232,21 +232,21 @@ for key in required_200:
 import json
 from pathlib import Path
 
-data = json.loads(Path("demo_outputs/demo_results.json").read_text(encoding="utf-8"))
+data = json.loads(Path("evaluation_outputs/evaluation_results.json").read_text(encoding="utf-8"))
 summary = {
     "standard_improvement": data["improvement"],
     "recession_improvement": data["scenario_results"]["recession"]["improvement"],
     "competition_improvement": data["scenario_results"]["competition"]["improvement"],
     "artifact_files": [
-        "demo_outputs/demo_results.json",
-        "demo_outputs/policy_comparison_plots.png",
-        "demo_outputs/trained_policy_qtable.json",
+        "evaluation_outputs/evaluation_results.json",
+        "evaluation_outputs/policy_comparison_plots.png",
+        "evaluation_outputs/trained_policy_qtable.json",
     ],
 }
 print(json.dumps(summary, indent=2))
 '@
 
-    Write-Pass "Full hackathon judge flow completed successfully."
+    Write-Pass "Full automated evaluation pipeline completed successfully."
     exit 0
 } catch {
     Fail-Fast $_.Exception.Message
