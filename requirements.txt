@@ -1,12 +1,26 @@
-# Runtime dependencies used by the Hugging Face Space and API server.
+# Simulation & API
 fastapi
 uvicorn
 pydantic
 pydantic-settings
 httpx
 openai
-openenv-core>=0.2.0
-
-# Lightweight utilities for local checks / demo scripts.
-numpy
 pytest
+openenv-core
+
+# Data & ML
+numpy
+pandas
+matplotlib
+datasets
+torch
+transformers
+peft
+trl
+bitsandbytes
+accelerate
+
+# Unsloth specific (Optimized Kernels)
+unsloth
+xformers
+triton
