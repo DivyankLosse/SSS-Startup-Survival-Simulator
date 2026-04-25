@@ -28,7 +28,7 @@ class StartupEnv:
         self._churn_rate = 0.03
         self._technical_debt = 0.0
         self._milestones_reached = set()
-        self.current_state = StartupState()
+        self.current_state = StartupState(churn_rate=self._churn_rate, market_demand=self._market_demand)
         return self.current_state
 
     def state(self) -> StartupState:
@@ -42,7 +42,6 @@ class StartupEnv:
         except ValueError as exc:
             raise ValueError(f"Invalid action: {action}") from exc
 
-        state_before = self.current_state.model_copy(deep=True)
         state = self.current_state
         info: Dict[str, object] = {"action": selected_action.value}
 
@@ -70,8 +69,14 @@ class StartupEnv:
         info["lost_users"] = lost_users
         info["net_users"] = state.users - prev_users
         info["revenue_delta"] = round(state.revenue - prev_revenue, 2)
+        self._sync_observable_rates(state)
 
         return StepResult(state=state, reward=reward, done=done, info=info).model_dump()
+
+    def _sync_observable_rates(self, state: StartupState) -> None:
+        """Expose internal market/churn dynamics in the public observation state."""
+        state.churn_rate = round(self._churn_rate, 4)
+        state.market_demand = round(self._market_demand, 4)
 
     def _apply_action_effects(self, state: StartupState, action: Action, info: Dict[str, object]) -> None:
         if action == Action.INCREASE_MARKETING:

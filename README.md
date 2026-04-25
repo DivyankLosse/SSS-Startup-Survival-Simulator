@@ -20,7 +20,7 @@ An OpenEnv-style startup decision simulator where an agent learns how to survive
 
 ## Overview
 
-Startup Survival Simulator is a real-world, OpenEnv-compliant environment exposing a standard `reset()` / `step()` / `state()` interface via FastAPI. An AI agent observes 10 startup metrics and chooses one of 7 actions each turn. The environment evolves through compounding effects on growth, revenue, product quality, morale, and cash — reflecting the real decisions an early-stage founder faces.
+Startup Survival Simulator is a real-world, OpenEnv-compliant environment exposing a standard `reset()` / `step()` / `state()` interface via FastAPI. An AI agent observes 10 startup metrics and chooses one of 9 actions each turn. The environment evolves through compounding effects on growth, revenue, product quality, morale, and cash — reflecting the real decisions an early-stage founder faces.
 
 Episodes end when the startup **goes bankrupt**, **reaches 10,000 users**, or hits the **50-step timeout**.
 
@@ -73,6 +73,8 @@ export HF_TOKEN="hf_xxxxxxxxxxxx"
 | `reduce_costs` | −burn_rate, −growth_rate, −morale |
 | `pivot_market` | Random market_demand ± shift (high risk/reward) |
 | `raise_funding` | Probabilistic +$30,000 cash (based on product quality & users) |
+| `analyze_market` | Spend cash to get demand/churn estimates in `info.market_report` |
+| `refactor_code` | Spend cash to reduce technical debt and improve quality/morale |
 | `do_nothing` | −morale (tiny) |
 
 ---
