@@ -6,9 +6,9 @@ import json
 from pathlib import Path
 from typing import Dict, List
 
-from sss_hackathon_env import StartupSurvivalEnv
-from sss_reward_verifier import verify_episode
-from sss_training import (
+from advanced_env import StartupSurvivalEnv
+from reward_verifier import verify_episode
+from train_policy import (
     build_greedy_policy,
     build_random_policy,
     evaluate_policy_in_scenario,
@@ -93,9 +93,9 @@ def run_demo() -> Dict[str, object]:
 
     results["scenario_results"] = scenario_results
 
-    output_dir = Path("demo_outputs")
+    output_dir = Path("evaluation_outputs")
     output_dir.mkdir(parents=True, exist_ok=True)
-    with (output_dir / "demo_results.json").open("w", encoding="utf-8") as fp:
+    with (output_dir / "evaluation_results.json").open("w", encoding="utf-8") as fp:
         json.dump(results, fp, indent=2)
     save_artifacts(artifacts, str(output_dir / "trained_policy_qtable.json"))
 
@@ -109,4 +109,4 @@ if __name__ == "__main__":
     print("Trained metrics:", demo["trained_metrics"])
     print("Improvement:", demo["improvement"])
     print("Replay seed:", demo["same_seed_replay"]["seed"])
-    print("Results saved to: demo_outputs/demo_results.json")
+    print("Results saved to: evaluation_outputs/evaluation_results.json")

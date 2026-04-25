@@ -12,15 +12,15 @@ from __future__ import annotations
 import math
 from typing import Callable, Dict, List
 
-from sss_hackathon_env import ACTIONS
-from sss_training import (
+from advanced_env import ACTIONS
+from train_policy import (
     build_greedy_policy,
     build_random_policy,
     evaluate_policy,
     run_episode,
     train_q_learning,
 )
-from sss_reward_verifier import verify_episode
+from reward_verifier import verify_episode
 
 
 def _fixed_action_policy(action: str) -> Callable[[Dict[str, float]], str]:
@@ -50,7 +50,7 @@ def run_stress_debug(seeds: List[int] | None = None) -> Dict[str, object]:
     suspicious = []
 
     # Reuse run_episode to avoid alternate code paths.
-    from sss_hackathon_env import StartupSurvivalEnv
+    from advanced_env import StartupSurvivalEnv
 
     env = StartupSurvivalEnv(seed=999)
     for seed in seeds:

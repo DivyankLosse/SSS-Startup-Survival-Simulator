@@ -11,7 +11,7 @@ from tasks import get_tasks
 
 app = FastAPI(
     title="Startup Survival Simulator",
-    description="OpenEnv-style startup decision environment for hackathon evaluation.",
+    description="OpenEnv-style startup decision environment for robust agent evaluation.",
     version="1.0.0",
 )
 

@@ -1,4 +1,4 @@
-# Startup Survival Simulator (SSS) - Hackathon Architecture
+# Startup Survival Simulator (SSS) - Evaluation Architecture
 
 ## Phase 1: System Design
 
@@ -14,26 +14,26 @@ Core loop:
 
 ## Module Breakdown
 
-- `sss_hackathon_env.py`
+- `advanced_env.py`
   - OpenEnv-style environment (`reset`, `step`, `state`)
   - State transitions, anti-cheat constraints, deterministic market dynamics
-- `sss_reward_verifier.py`
+- `reward_verifier.py`
   - Layered reward function
   - Deterministic verification checks
-- `sss_training.py`
+- `train_policy.py`
   - Tabular Q-learning loop
   - Random baseline and trained policy evaluation
-- `sss_demo.py`
+- `evaluate_policy.py`
   - End-to-end reproducible baseline vs trained comparison
   - Same-seed replay and JSON artifact generation
 
 ## Data Flow
 
-1. `sss_demo.py` starts training/evaluation.
-2. `sss_training.py` calls `StartupSurvivalEnv.reset/step`.
-3. `sss_hackathon_env.py` updates state and calls `compute_reward`.
+1. `evaluate_policy.py` starts training/evaluation.
+2. `train_policy.py` calls `StartupSurvivalEnv.reset/step`.
+3. `advanced_env.py` updates state and calls `compute_reward`.
 4. Trajectories are passed to `verify_episode`.
-5. Metrics are aggregated and written to `demo_outputs/demo_results.json`.
+5. Metrics are aggregated and written to `evaluation_outputs/evaluation_results.json`.
 
 ## Key Verifiability Hooks
 

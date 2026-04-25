@@ -1,4 +1,4 @@
-"""Reward logic and deterministic verification for the hackathon simulator."""
+"""Reward logic and deterministic verification for the evaluation simulator."""
 
 from __future__ import annotations
 
@@ -45,7 +45,7 @@ def verify_episode(
     trajectory: List[Dict[str, object]],
     required_survival_steps: int = 30,
 ) -> Dict[str, object]:
-    """Deterministic checks requested by hackathon brief."""
+    """Deterministic checks requested by evaluation brief."""
     if not trajectory:
         return {
             "passed": False,

@@ -1,7 +1,7 @@
-"""Visualize baseline vs trained policy performance from demo_outputs data.
+"""Visualize baseline vs trained policy performance from evaluation_outputs data.
 
 Usage:
-    python sss_visualize_demo.py
+    python visualize_evaluation.py
 """
 
 from __future__ import annotations
@@ -11,11 +11,11 @@ import argparse
 from collections import Counter
 from pathlib import Path
 
-DEFAULT_INPUT = Path("demo_outputs") / "demo_results.json"
-DEFAULT_OUTPUT = Path("demo_outputs") / "policy_comparison_plots.png"
+DEFAULT_INPUT = Path("evaluation_outputs") / "evaluation_results.json"
+DEFAULT_OUTPUT = Path("evaluation_outputs") / "policy_comparison_plots.png"
 
 
-def _load_demo_results(path: Path) -> dict:
+def _load_evaluation_results(path: Path) -> dict:
     with path.open("r", encoding="utf-8") as fp:
         return json.load(fp)
 
@@ -29,7 +29,7 @@ def _extract_action_counts(replay_block: dict) -> Counter:
 def build_plots(input_path: Path = DEFAULT_INPUT, output_path: Path = DEFAULT_OUTPUT) -> Path:
     import matplotlib.pyplot as plt
 
-    data = _load_demo_results(input_path)
+    data = _load_evaluation_results(input_path)
 
     baseline_metrics = data["baseline_metrics"]
     trained_metrics = data["trained_metrics"]
@@ -88,7 +88,7 @@ def build_plots(input_path: Path = DEFAULT_INPUT, output_path: Path = DEFAULT_OU
 
 
 def validate_input(input_path: Path = DEFAULT_INPUT) -> None:
-    data = _load_demo_results(input_path)
+    data = _load_evaluation_results(input_path)
     required_top = {"baseline_metrics", "trained_metrics", "same_seed_replay"}
     missing = required_top - set(data.keys())
     if missing:
@@ -96,13 +96,13 @@ def validate_input(input_path: Path = DEFAULT_INPUT) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Visualize baseline vs trained policy from demo_outputs JSON.")
-    parser.add_argument("--input", default=str(DEFAULT_INPUT), help="Path to demo_results.json")
+    parser = argparse.ArgumentParser(description="Visualize baseline vs trained policy from evaluation_outputs JSON.")
+    parser.add_argument("--input", default=str(DEFAULT_INPUT), help="Path to evaluation_results.json")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT), help="Path to output PNG")
     parser.add_argument(
         "--validate-only",
         action="store_true",
-        help="Validate demo_outputs data schema without plotting.",
+        help="Validate evaluation_outputs data schema without plotting.",
     )
     args = parser.parse_args()
 
