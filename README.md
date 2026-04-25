@@ -11,119 +11,90 @@ license: mit
 
 # Startup Survival Simulator
 
-An OpenEnv-style startup decision simulator where an agent learns how to survive and scale under constraints.
+OpenEnv-compliant environment for training LLM agents to make sequential startup decisions under uncertainty (cash, growth, burn, morale, and product quality trade-offs).
 
-**Live Space:** https://huggingface.co/spaces/Loosebag/SSS-Startup-Survival-Simulator
-**API Docs:** Publish your own Hugging Face Space first, then use `<your-space-url>/docs`
+## Submission Links
 
----
+- Hugging Face Space: [Loosebag/SSS-Startup-Survival-Simulator](https://huggingface.co/spaces/Loosebag/SSS-Startup-Survival-Simulator)
+- Colab Training Notebook (TRL + Unsloth): [train_trl.ipynb](https://colab.research.google.com/github/DivyankLosse/SSS-Startup-Survival-Simulator/blob/main/train_trl.ipynb)
+- Code Repository: [DivyankLosse/SSS-Startup-Survival-Simulator](https://github.com/DivyankLosse/SSS-Startup-Survival-Simulator)
+- Mini-blog / video / slides: `TODO_ADD_LINK_BEFORE_FINAL_SUBMISSION`
 
-## Overview
+## Environment API
 
-Startup Survival Simulator is a real-world, OpenEnv-compliant environment exposing a standard `reset()` / `step()` / `state()` interface via FastAPI. An AI agent observes 10 startup metrics and chooses one of 9 actions each turn. The environment evolves through compounding effects on growth, revenue, product quality, morale, and cash — reflecting the real decisions an early-stage founder faces.
+Standard environment loop:
 
-Episodes end when the startup **goes bankrupt**, **reaches 10,000 users**, or hits the **50-step timeout**.
+- `POST /reset`
+- `POST /step`
+- `GET /state`
+- `GET /tasks`
+- `GET /grader?task_name=<survival|growth|scaling>`
+- `GET /baseline?seed=42`
 
----
+Public actions accepted by `POST /step`:
 
-## Environment Variables
+- `increase_marketing`
+- `hire_engineer`
+- `improve_product`
+- `reduce_costs`
+- `pivot_market`
+- `raise_funding`
+- `analyze_market`
+- `refactor_code`
+- `do_nothing`
 
-Set these before running `inference.py`:
+Episode terminal conditions:
 
-| Variable | Description | Example |
-|---|---|---|
-| `API_BASE_URL` | OpenAI-compatible LLM endpoint | `https://router.huggingface.co/v1` |
-| `MODEL_NAME` | Model identifier | `Qwen/Qwen2.5-7B-Instruct` |
-| `HF_TOKEN` | Hugging Face API key | `hf_xxxxxxxxxxxx` |
+- `bankrupt` (cash <= 0)
+- `success` (users >= 10,000)
+- `timeout` (time_step >= 50)
 
-```bash
-export API_BASE_URL="https://router.huggingface.co/v1"
-export MODEL_NAME="Qwen/Qwen2.5-7B-Instruct"
-export HF_TOKEN="hf_xxxxxxxxxxxx"
-```
+## Training Pipeline (Hackathon Demo)
 
----
+Included scripts:
 
-## Observation Space
+- Environment (long-horizon + scenarios): `sss_hackathon_env.py`
+- Reward + verifier: `sss_reward_verifier.py`
+- Training loop: `sss_training.py`
+- Demo/eval runner: `sss_demo.py`
+- Stress/debug checks: `sss_stress_debug.py`
+- Plot generation: `sss_visualize_demo.py`
 
-| Field | Type | Description |
-|---|---|---|
-| `cash` | `float` | Available cash in USD |
-| `users` | `int` | Active users |
-| `revenue` | `float` | Revenue this step in USD |
-| `growth_rate` | `float [0,1]` | New-user multiplier |
-| `burn_rate` | `float` | Operating cost per step in USD |
-| `churn_rate` | `float [0,1]` | Fraction of users lost per step |
-| `product_quality` | `float [0,1]` | Product quality score |
-| `market_demand` | `float [0,1]` | External market demand score |
-| `morale` | `float [0,1]` | Team morale score |
-| `time_step` | `int` | Current step counter |
+Supported scenarios:
 
-**Starting values:** cash=50,000 · users=100 · revenue=1,000 · growth_rate=0.08 · burn_rate=4,500 · churn_rate=0.03 · product_quality=0.55 · market_demand=0.60 · morale=0.70
+- `standard`
+- `recession`
+- `competition`
 
----
+## Evidence of Learning
 
-## Action Space
+Tracked artifacts:
 
-| Action | Effect |
-|---|---|
-| `increase_marketing` | +growth_rate, +market_demand, ++burn_rate |
-| `hire_engineer` | ++product_quality, +morale, +++burn_rate |
-| `improve_product` | +product_quality, −churn_rate, +morale |
-| `reduce_costs` | −burn_rate, −growth_rate, −morale |
-| `pivot_market` | Random market_demand ± shift (high risk/reward) |
-| `raise_funding` | Probabilistic +$30,000 cash (based on product quality & users) |
-| `analyze_market` | Spend cash to get demand/churn estimates in `info.market_report` |
-| `refactor_code` | Spend cash to reduce technical debt and improve quality/morale |
-| `do_nothing` | −morale (tiny) |
+- `artifacts/demo_results.json`
+- `artifacts/trained_policy_qtable.json`
+- `artifacts/policy_comparison_plots.png`
 
----
+Baseline vs trained metrics are stored in `artifacts/demo_results.json`:
 
-## Tasks & Grading
+- `improvement.avg_reward_lift`
+- `improvement.survival_rate_lift`
+- `improvement.verifier_pass_rate_lift`
+- `scenario_results.recession`
+- `scenario_results.competition`
 
-| Task | Difficulty | Goal | Scoring Formula |
-|---|---|---|---|
-| `survival` | Easy | Survive 30 steps without bankruptcy | `time_step / 30 − cash_penalty` |
-| `growth` | Medium | Reach 1,000 active users | `users / 1000 + sustainability_bonus` |
-| `scaling` | Hard | Maximize revenue/burn efficiency | `efficiency × 0.7 + user_factor × 0.3` |
+Training/evaluation plot:
 
-All scores are clamped to `[0.0, 1.0]`.
+![Policy Comparison Plot](artifacts/policy_comparison_plots.png)
 
----
+## Local Run
 
-## API Endpoints
-
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/` | HTML landing page — returns HTTP 200 |
-| `POST` | `/reset` | Reset environment, optional `{"seed": 42}` body |
-| `POST` | `/step` | Apply action, e.g. `{"action": "improve_product"}` |
-| `GET` | `/state` | Current environment state |
-| `GET` | `/tasks` | Task list + action schema |
-| `GET` | `/grader?task_name=survival` | Score current state for a task |
-| `GET` | `/baseline?seed=42` | Run deterministic baseline across all tasks |
-| `GET` | `/docs` | Interactive Swagger UI |
-
----
-
-## Submission Files
-
-The evaluation verifier expects these files in the repo root:
-
-- `interface.py`
-- `openenv.yaml`
-- `requirements.txt`
-- `Dockerfile`
-
-## Run Locally
-
-Install dependencies:
+Install runtime deps:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Start the API:
+Run API server:
 
 ```bash
 uvicorn api:app --host 0.0.0.0 --port 7860
@@ -131,64 +102,41 @@ uvicorn api:app --host 0.0.0.0 --port 7860
 
 Open:
 
-- Local app: http://localhost:7860/
-- Swagger docs: http://localhost:7860/docs
+- App root: `http://localhost:7860/`
+- API docs: `http://localhost:7860/docs`
 
-## Run Inference
-
-Set these environment variables before running `inference.py`:
-
-- `API_BASE_URL`
-- `MODEL_NAME`
-- `HF_TOKEN`
-
-Example:
-
-```bash
-export API_BASE_URL="https://router.huggingface.co/v1"
-export MODEL_NAME="Qwen/Qwen2.5-7B-Instruct"
-export HF_TOKEN="hf_xxxxxxxxxxxx"
-python inference.py
-```
-
-## API Endpoints
-
-- `GET /`
-- `POST /reset`
-- `POST /step`
-- `GET /state`
-- `GET /tasks`
-- `GET /grader?task_name=survival`
-- `GET /baseline?seed=42`
-- `GET /docs`
-
-## Quick Test
-
-```bash
-pytest test_smoke.py -v
-```
-
-Optional validation:
+Optional submission checker:
 
 ```bash
 bash validate_submission.sh
 ```
 
----
+## Training Dependencies
 
-## Project Structure
+For Colab/GPU training only:
 
+```bash
+pip install -r requirements-training.txt
 ```
-├── api.py            # FastAPI app — all HTTP endpoints
-├── env.py            # StartupEnv simulation logic
-├── models.py         # Pydantic typed models (State, Action, StepResult, etc.)
-├── grader.py         # Task graders — survival / growth / scaling
-├── tasks.py          # Task metadata for /tasks endpoint
-├── baseline.py       # Deterministic baseline policy
-├── inference.py      # LLM inference script (inference entry point)
-├── interface.py      # Repo-root compatibility interface for submission validators
-├── test_smoke.py     # Pre-submission smoke tests
-├── openenv.yaml      # OpenEnv spec manifest
-├── Dockerfile        # Docker build for HF Spaces
-└── requirements.txt  # Python dependencies
-```
+
+Or just run the provided Colab notebook (`train_trl.ipynb`) which installs TRL + Unsloth directly.
+
+## Required Files Checklist
+
+- `api.py`
+- `env.py`
+- `models.py`
+- `grader.py`
+- `tasks.py`
+- `baseline.py`
+- `inference.py`
+- `interface.py`
+- `openenv.yaml`
+- `requirements.txt`
+- `Dockerfile`
+
+## Final Pre-Submission TODOs
+
+- Replace `TODO_ADD_LINK_BEFORE_FINAL_SUBMISSION` with your actual mini-blog/video/slides URL.
+- Confirm the linked Hugging Face Space points to the final commit.
+- Re-run validation and include fresh plots if you retrain.
