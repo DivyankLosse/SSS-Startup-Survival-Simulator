@@ -10,6 +10,8 @@ actions:
   - reduce_costs
   - pivot_market
   - raise_funding
+  - analyze_market
+  - refactor_code
   - do_nothing
 
 observations:
